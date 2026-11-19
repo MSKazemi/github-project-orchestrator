@@ -8,11 +8,24 @@ This is the **generic usage guide** for GitHub Project Orchestrator. Replace pla
 |---|---|---|
 | [NAME OF THE PROJECT] | Human-readable name | My Example App |
 | [GITHUB REPOSITORY URL] | Exact target repository URL | https://github.com/OWNER/REPOSITORY |
-| [PROJECT GOAL] | One-sentence measurable outcome | Deliver an MVP with tested API and documented release gate |
+| [CURRENT GOAL] | Next meaningful outcome | Stabilize the existing release and resolve confirmed blockers |
+| [PROJECT LIFECYCLE] | AUTO-DETECT or your selected stage | AUTO-DETECT |
 | [APPROVED DEADLINE] | Real approved deadline, or NONE APPROVED | NONE APPROVED |
 | [LINK OR PATH TO APPROVED PLAN] | Reviewed JSON plan or GitHub discussion | Not yet approved |
 
 **Important:** In the executable JSON plan, write the actual `OWNER/REPOSITORY`, project title, and verified work. The example JSON uses `OWNER/REPOSITORY` as a syntactically valid placeholder. Square-bracket prompts are **not** inputs to `gh` or the JSON schema. Do not apply the fictional plan as-is.
+
+## Match the existing project stage
+
+| Stage | Planning emphasis |
+|---|---|
+| New | Scope, feasibility, prototype, optional MVP |
+| Pre-release | Actual next release and readiness gates |
+| Established / released | Reliability, current backlog, next release, compatibility, community and contributor work |
+| Research | Experiments, evaluation evidence, datasets and publication gates |
+| Maintenance-only | Regressions, security, support and deprecation where applicable |
+
+**For existing projects:** audit and reconcile the real board, milestones and issues first; the desired output may be just updated relationships or a status report, with **zero new milestones and zero new issues**. Never reproduce historical completed work, create a second board or add an MVP by default.
 
 ## Example: first-time setup for any repository
 
@@ -23,18 +36,18 @@ This is the **generic usage guide** for GitHub Project Orchestrator. Replace pla
 5. After approval, Claude Code runs the CLI provisioner, verifies the actual board/issue links/fields, and returns the URLs.
 6. For later check-ins, use [the weekly review prompt](../prompts/WEEKLY_REVIEW.md).
 
-## Expected hierarchy (fictional illustration)
+## Expected hierarchy (fictional illustration for an already released project)
 
-    [NAME OF THE PROJECT] — GitHub Project V2
-    ├── M0: Baseline verified
-    │   └── [EPIC] Establish reproducible baseline
-    │       ├── Audit tests and CI
-    │       └── Review critical risks
-    └── M1: MVP candidate
-        └── [EPIC] Implement MVP vertical slice
-            ├── Define acceptance test
-            ├── Implement smallest demonstrable feature
-            └── Validate release gate (blocked by acceptance test)
+    [NAME OF THE PROJECT] — existing GitHub Project V2 (reuse)
+    ├── Existing milestone: current release / next meaningful outcome
+    │   ├── Existing epic: Reliability and compatibility (reuse)
+    │   │   ├── Existing regression issue (do not recreate)
+    │   │   └── Missing verified test gate (only if genuinely needed)
+    │   └── Existing epic: Next increment (reuse if present)
+    │       └── A bounded, accepted improvement
+    └── Evergreen bugs / translations / community (may have no milestone)
+
+The hierarchy is **illustrative only**; do not invent those milestones or issues if the target repository does not need them. A greenfield project may instead use prototype or MVP stages when supported by the goals.
 
 In GitHub, milestones track targets; epics and children are **real issues**; blockers are **native dependencies**. Never mistake textual indentation for a native GitHub relationship.
 
