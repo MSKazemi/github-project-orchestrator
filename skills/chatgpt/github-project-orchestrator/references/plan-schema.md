@@ -21,6 +21,13 @@ Reference file: `../assets/project-plan.example.json`.
 - No circular parent relations or blocked-by cycles; the script validates both before reading or writing GitHub.
 - Record estimated effort separately in issue body or a Project `Estimate` field established by an approved process; the shipped script intentionally does not invent it.
 
+## Lifecycle and project maturity
+
+- **Do not require an MVP.** Infer project stage from releases, active users, existing roadmap, issue/PR history and current objectives.
+- For an established repository, reuse the existing board, release/milestone policy, epics, work history and accepted status. Plan the next release, reliability, compatibility, maintenance or research evidence as appropriate.
+- The JSON schema allows empty `milestones` and empty `issues` arrays. **Creating zero new issues/milestones is valid** when the project already has sufficient management records.
+- Sample milestone keys `m0`/`m1` and example tasks are **fictional syntax examples**, not instructions to create M0/M1 stages in a real repo. Keep existing milestones when an actual target repo already has them.
+
 ## Existing-work reconciliation
 
 - Match a previously managed issue via `<!-- github-project-orchestrator:key=... -->` in its body.
