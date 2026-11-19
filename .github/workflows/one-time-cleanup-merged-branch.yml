@@ -1,0 +1,38 @@
+name: One-time cleanup of merged bootstrap branch
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.repository == 'MSKazemi/github-project-orchestrator'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete only the merged PR 1 branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch='feat/bootstrap-skills-and-provisioner'
+          endpoint="repos/${GITHUB_REPOSITORY}/git/refs/heads/${branch}"
+          merged="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/1" --jq '.merged')"
+          if [ "${merged}" != 'true' ]; then
+            echo 'PR 1 is not merged; will not delete any branch.'
+            exit 1
+          fi
+          existing="$(gh api "${endpoint}" --jq '.ref' 2>/dev/null || true)"
+          if [ -z "${existing}" ]; then
+            echo 'Bootstrap feature branch already absent.'
+            exit 0
+          fi
+          if [ "${existing}" != "refs/heads/${branch}" ]; then
+            echo 'Unexpected Git ref; refusing to delete.'
+            exit 1
+          fi
+          gh api --method DELETE "${endpoint}"
+          echo 'Deleted merged bootstrap branch.'
