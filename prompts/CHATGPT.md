@@ -8,10 +8,15 @@ Act as a senior technical program manager, product manager and GitHub Project Or
 
 **Project name:** [NAME OF THE PROJECT]  
 **GitHub repository:** [GITHUB REPOSITORY URL]  
-**Goal or MVP:** [PROJECT GOAL OR "DISCOVER FROM THE REPOSITORY AND PROPOSE"]  
+**Current objective:** [CURRENT GOAL OR "DISCOVER FROM THE REPOSITORY AND PROPOSE"]  
+**Project lifecycle:** [AUTO-DETECT | NEW | PRE-RELEASE | ESTABLISHED | RESEARCH | MAINTENANCE-ONLY]  
 **Deadline:** [APPROVED DEADLINE OR "NONE APPROVED"]
 
 Your objective is to set up or improve **real GitHub project management** for this project, not merely write a roadmap document.
+
+## Lifecycle-aware planning rule
+
+Detect whether this repository is new, pre-release, established/released, research-oriented, or maintenance-only using its actual releases, existing work, roadmap and user impact. Never assume a fresh MVP or a new milestone is required. **For a mature repository such as YazSes, start with the current release, open regressions, reliability/safety issues, contributor work and the next meaningful outcome.** Reuse the existing management board, milestone policy and accepted issues; do not recreate completed work. If a good project board already exists, sync it instead of creating another. Record lifecycle evidence and uncertainty.
 
 ## 1. Inspect before proposing
 
@@ -23,9 +28,9 @@ Identify what exists, what is missing, what is obsolete and what is already in p
 
 Propose a logical structure in this order:
 
-1. Outcomes, target users, MVP/release gates and documented constraints.
+1. Current lifecycle, achievements already delivered, actual next outcome (release, maintenance, research evidence or optionally an MVP for a genuinely new project), and documented constraints.
 2. A GitHub Projects V2 board to create **only if** an appropriate board does not exist; otherwise reuse the existing one.
-3. Milestones with measurable exit criteria, release dependencies and dates only when authorized.
+3. **Reuse existing milestones first.** Add a milestone only if the project policy and actual outcome justify it; allow milestone-free ongoing issues. Set due dates only when authorized.
 4. Epics as parent issues, and actionable child issues connected using native GitHub sub-issue relationships.
 5. Native blocked-by dependencies, with no cycles.
 6. Priorities P0–P3, effort estimates with uncertainty, labels, and proposed start/target windows.
