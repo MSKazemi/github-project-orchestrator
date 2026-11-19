@@ -54,6 +54,6 @@ Replace OWNER/REPOSITORY with the actual owner/repository from [GITHUB REPOSITOR
 
 Read back and report GitHub URLs for the board, milestones, epic parent issues, child issues, native dependency links, priority/date fields, and any actual views or active workflows. Rerun a read-only preview and check that another apply would not duplicate objects. Report unsupported CLI/API operations, manual UI steps, partial failures, and any differences from the approved plan.
 
-Do not merge PRs, auto-close issues, deploy, change repository permissions, assign people, publish or commit confidential content without approval. If changing toolkit code, use a feature branch and draft PR with tests and evidence.
+Do not merge PRs, auto-close issues, deploy, change repository permissions, assign people, publish or commit confidential content without approval. For toolkit code changes, run tests and review the exact diff. Keep `main` as the only long-lived branch. Use a temporary PR branch only if the owner requests one, and remove it after an authorized merge.
 
 **Required final report:** Audit evidence · Approved writes · Created/reused/unchanged objects (URLs) · Verified relationships/fields · Tests and CI result · Remaining manual steps · Next issues for developers.
