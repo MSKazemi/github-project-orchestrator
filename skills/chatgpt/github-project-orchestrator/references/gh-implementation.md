@@ -1,31 +1,41 @@
-# Native GitHub project plan schema v1
+# GitHub CLI, API and verification notes
 
-Reference file: `../assets/project-plan.example.json`.
+## Prerequisites
 
-- `schema_version`: integer `1`.
-- `repository`: exact `OWNER/REPO` (the target repository, not the Skill repository).
-- `project`: `owner`, unique `title`, optional `description`, optional `visibility` (PRIVATE/PUBLIC). The project owner may be a user or organization; credentials must have permission.
-- `milestones`: array of `{key, title, description, due_on}`. Each stable `key` is unique. `due_on` is optional ISO YYYY-MM-DD **only when approved**; otherwise null. These are repo-level milestones, not release tags.
-- `issues`: array of `{key, kind, title, body, priority, milestone, parent, blocked_by, start_date, target_date}`.
-  - `kind`: `epic` or `task`; `priority` P0/P1/P2/P3.
-  - `milestone`: milestone key defined above, or omitted/null.
-  - `parent`: issue key, or omitted/null. Native GitHub sub-issue edge is created for new issues, and missing parent edges on explicitly managed issues may be repaired; conflicting human-set parent edges are preserved for review.
-  - `blocked_by`: list of issue keys in the same plan; script creates native `blocked by` edges for new issues and fills missing edges on previously managed issues.
-  - `start_date` and `target_date`: ISO YYYY-MM-DD if meaningful; otherwise null. Project item fields are populated only for newly added items, to preserve human edits.
-  - `body`: Markdown with outcome, acceptance criteria, tests and evidence. A stable management marker is appended automatically, enabling duplicate-safe reruns.
+Install a recent GitHub CLI version that supports `gh issue create --parent` and `gh issue edit --add-blocked-by`. Run `gh auth login`, `gh auth status`, and `gh auth refresh -s project` if your token allows it. Ensure issue write access to the repository and project permissions for the chosen owner. Never paste a token into conversation or commit it to a repository.
 
-## Date and dependency rules
+**Native API / CLI mapping**
 
-- `due_on` is a real milestone due date in GitHub. Do not set an arbitrary date for demonstration on live repos.
-- Start and target dates may be proposed, but their distinction from approved dates must be visible in project description/reports.
-- No circular parent relations or blocked-by cycles; the script validates both before reading or writing GitHub.
-- Record estimated effort separately in issue body or a Project `Estimate` field established by an approved process; the shipped script intentionally does not invent it.
+- `gh project list --owner OWNER --format json`; `gh project create --owner OWNER --title TITLE --format json`; `gh project link NUMBER --owner OWNER --repo OWNER/REPO`.
+- `gh project field-create NUMBER --owner OWNER --name Priority --data-type SINGLE_SELECT --single-select-options P0,P1,P2,P3`.
+- `gh project item-add NUMBER --owner OWNER --url https://github.com/OWNER/REPO/issues/N`.
+- `gh project item-edit NUMBER --owner OWNER --url ISSUE_URL --field Priority --value P1`; dates use `--field 'Target date' --date YYYY-MM-DD`.
+- `gh issue create -R OWNER/REPO --title ... --body ... --label ... --milestone ...`.
+- `gh issue edit N -R OWNER/REPO --parent EPIC_NUMBER` creates an actual sub-issue relationship, not merely an issue-body checklist.
+- `gh issue edit N -R OWNER/REPO --add-blocked-by OTHER_ISSUE_NUMBER` creates a native dependency.
+- Milestones and project views can also use `gh api` authenticated REST endpoints. The script uses `gh api` for milestone creation.
 
-## Existing-work reconciliation
+Reference documentation:
+- https://cli.github.com/manual/gh_project
+- https://cli.github.com/manual/gh_project_item-edit
+- https://cli.github.com/manual/gh_issue_edit
+- https://docs.github.com/en/rest/issues/sub-issues
+- https://docs.github.com/en/rest/issues/issue-dependencies
+- https://docs.github.com/en/rest/projects/views
+- https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations
 
-- Match a previously managed issue via `<!-- github-project-orchestrator:key=... -->` in its body.
-- Otherwise match by exact title if unique. This prevents duplicate issues but **does not mean authorization to edit an existing issue**; existing titles, bodies, labels, milestones and parent links remain unchanged.
-- Duplicate titles or keys cause validation/execution errors.
-- If a similarly named issue exists but no exact match, use judgment and reconcile manually before applying; fuzzy auto-merge would be dangerous.
-- Project items that already exist are reused; current field values are preserved.
-- Don't copy secret or NDA information from other repos into plans.
+## Views and automation constraints
+
+- The script optionally attempts creation of a Table, Board and Roadmap view only when it creates a new Project; it does not create duplicate views in existing projects. GitHub Projects view API authorization differs for user-owned and org-owned projects; failure is logged, not counted as success. Configure native project view filters, grouping and date bars in the UI if needed.
+- Project built-in workflows include closed/merged -> Done. Auto-add, project Status transitions and item archiving can be configured separately in Project > Workflows. Review whether toggles are enabled and verify behavior with a safe test issue.
+- Actions-based scheduled reconciliation should use minimum permissions, a token with Project scope only if essential, least-cost schedule, and never bypass GitHub account Actions usage/billing restrictions.
+- This script does not configure GitHub workflows, branch protections, CODEOWNERS, org issue types, review rules, release publication or CI. It may propose them as a separate scoped PR, not mark them as active.
+
+## Operational safety
+
+- `--check-only`: offline JSON and graph validation; no network, no writes.
+- No `--apply`: authenticates/read actual state; prints proposed operations; no writes.
+- `--apply --confirm OWNER/REPO`: makes incremental GitHub writes. GitHub API operations are not a transaction; if interrupted, rerun from the same plan and review warnings; do not create a new plan with changed keys.
+- Existing matched titles, bodies and project fields are preserved, and existing hierarchy links aren't silently rewritten. Existing issues with managed markers may receive missing parent or blocker relationships; conflicting relationships are preserved for review.
+- Use `--with-views` only if creating a new project and token supports the REST API. Verify result manually.
+- After applying, query GitHub again and report actual URL, issues, milestones, relationships and Project item fields. Do not treat command exit status as independent verification of correctness.
