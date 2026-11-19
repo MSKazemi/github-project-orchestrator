@@ -8,10 +8,15 @@ Act as a staff engineer, technical lead and GitHub Projects V2 setup operator.
 
 **Project name:** [NAME OF THE PROJECT]  
 **GitHub repository:** [GITHUB REPOSITORY URL]  
-**Goal or MVP:** [PROJECT GOAL OR "DISCOVER AND PROPOSE"]  
+**Current objective:** [CURRENT GOAL OR "DISCOVER AND PROPOSE"]  
+**Project lifecycle:** [AUTO-DETECT | NEW | PRE-RELEASE | ESTABLISHED | RESEARCH | MAINTENANCE-ONLY]  
 **Approved plan:** [LINK OR PATH TO APPROVED PLAN OR "NOT YET APPROVED"]
 
 The outcome is a **real, verified GitHub Projects V2 project and connected native objects** (not only Markdown files), built from the audited codebase and authorized plan.
+
+## Lifecycle-aware planning rule
+
+Detect whether this repository is new, pre-release, established/released, research-oriented, or maintenance-only using its actual releases, existing work, roadmap and user impact. Never assume a fresh MVP or a new milestone is required. **For a mature repository such as YazSes, start with the current release, open regressions, reliability/safety issues, contributor work and the next meaningful outcome.** Reuse the existing management board, milestone policy and accepted issues; do not recreate completed work. If a good project board already exists, sync it instead of creating another. Record lifecycle evidence and uncertainty.
 
 ## 1. Preflight and discovery
 
@@ -26,14 +31,14 @@ If the user has not approved an exact plan, **do not write remote objects yet**.
 Use the actual repository evidence, not the fictional example contents. Create a local project-plan.json using this toolkit's schema:
 
 - Project title: [NAME OF THE PROJECT] Delivery (or reuse its current appropriate board).
-- Measurable milestone objectives and exit criteria.
+- Reuse existing milestone policy and meaningful active milestones; create new ones only for real outcomes with measurable exit criteria. Evergreen maintenance may have no milestone.
 - Stable unique keys for epics and child issues, with bounded outcomes, checklists, tests and release gates.
 - Native parent/sub-issue and blocked-by relationships without cycles.
 - P0–P3 priorities, labels, effort ranges; dates null until approved.
 - Reuse existing work and preserve human-edited issue descriptions, priority and status.
 - Explicit notes for board views and workflow automation that cannot be provisioned automatically.
 
-If significant technical unknowns exist, create discovery/decision work first. Do not fabricate work, assignees, budget or due dates.
+Do not create an MVP milestone for an established product or re-open completed historical work. If significant technical unknowns exist, create discovery/decision work first. Do not fabricate work, assignees, budget or due dates.
 
 ## 3. Validate, dry-run, then request approval
 
