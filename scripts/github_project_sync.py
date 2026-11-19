@@ -182,6 +182,33 @@ def find_issue(existing, issue):
     return (by_title[0], 'matched-title') if by_title else (None, 'new')
 
 
+def linked_issue_numbers(detail, field):
+    """Read the issue relationship shape returned by GitHub CLI.
+
+    Current `gh issue view --json blockedBy` returns a connection object
+    with `nodes` and `totalCount`, not a flat list. Refuse incomplete
+    data rather than creating duplicate relationships on a re-run.
+    """
+    if not isinstance(detail, dict) or field not in detail:
+        raise SetupError(f'GitHub issue relationship {field} was not returned')
+    relationship = detail[field]
+    if isinstance(relationship, dict):
+        nodes = relationship.get('nodes')
+        total = relationship.get('totalCount')
+        if not isinstance(nodes, list) or type(total) is not int:
+            raise SetupError(f'Unexpected {field} connection schema')
+        if total != len(nodes):
+            raise SetupError(f'{field} relationship inventory incomplete ({len(nodes)} of {total})')
+    elif isinstance(relationship, list):
+        # Accept older/alternate gh output shapes without losing safety.
+        nodes = relationship
+    else:
+        raise SetupError(f'Unexpected {field} relationship shape')
+    if any(not isinstance(node, dict) or type(node.get('number')) is not int for node in nodes):
+        raise SetupError(f'Invalid {field} issue number')
+    return {node['number'] for node in nodes}
+
+
 def notice(action, dry):
     print(('PLAN ' if dry else 'DONE ') + action)
 
@@ -322,7 +349,7 @@ def execute(plan, apply=False, with_views=False):
             elif apply and provenance[i['key']] == 'managed':
                 detail=run('issue','view',str(issues_by_key[i['key']]),'--repo',repo,
                            '--json','blockedBy', json_result=True)
-                blocked={x.get('number') for x in detail.get('blockedBy', [])}
+                blocked=linked_issue_numbers(detail, 'blockedBy')
                 if issues_by_key[b] not in blocked:
                     run('issue','edit',str(issues_by_key[i['key']]),'--repo',repo,
                         '--add-blocked-by',str(issues_by_key[b]))
