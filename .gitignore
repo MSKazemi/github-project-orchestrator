@@ -1,0 +1,6 @@
+# Local, repo-specific plans may contain confidential data.
+project-plan.json
+.env
+*.log
+__pycache__/
+*.pyc
