@@ -67,7 +67,8 @@ class FakeGh:
         if args[:2] == ['issue', 'view']:
             num=int(args[2])
             parent=next(({'number':p} for _,child,p in self.links if child==num), None)
-            return {'blockedBy':[{'number':n} for n in self.blockers.get(num,set())], 'parent':parent}
+            nums=sorted(self.blockers.get(num,set()))
+            return {'blockedBy':{'nodes':[{'number':n} for n in nums], 'totalCount':len(nums)}, 'parent':parent}
         if args[:2] == ['label', 'list']:
             return [{'name':x} for x in self.labels]
         if args[:2] == ['label', 'create']:
@@ -122,6 +123,21 @@ class Tests(unittest.TestCase):
         self.assertIn(('parent',101,100),fake.links)
         self.assertIn(('parent',102,100),fake.links)
         self.assertEqual(len(fake.issues),3)
+
+    def test_native_relationship_connection_shape(self):
+        self.assertEqual(gpo.linked_issue_numbers(
+            {'blockedBy': {'nodes': [{'number': 4}, {'number': 9}], 'totalCount': 2}},
+            'blockedBy'), {4, 9})
+
+    def test_refuse_truncated_relationships(self):
+        with self.assertRaisesRegex(gpo.SetupError, 'incomplete'):
+            gpo.linked_issue_numbers(
+                {'blockedBy': {'nodes': [{'number': 4}], 'totalCount': 60}},
+                'blockedBy')
+
+    def test_refuse_missing_relationships(self):
+        with self.assertRaisesRegex(gpo.SetupError, 'not returned'):
+            gpo.linked_issue_numbers({}, 'blockedBy')
 
     def test_apply_twice_is_idempotent_and_links(self):
         fake=FakeGh()
