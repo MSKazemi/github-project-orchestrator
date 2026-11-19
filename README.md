@@ -21,6 +21,12 @@ No need to write a new prompt or Skill for each repository. Replace `[NAME OF TH
 
 **Example input:** Project `[NAME OF THE PROJECT]`; repository `[GITHUB REPOSITORY URL]`. Always start by inspecting the live repository, then plan, approve the exact writes, apply through authorized tools and verify the resulting GitHub objects.
 
+## Plan for the actual project stage — not always an MVP
+
+The orchestrator **does not assume every project needs an MVP**. It inspects releases, adoption, existing governance, milestones and issues to distinguish new, pre-release, established, research and maintenance-only projects. A new project *may* need an MVP; a mature project like YazSes should instead reuse its existing delivery structure and plan reliability, defects, the next release and ongoing maintenance. If no new milestones or issues are justified, creating none is valid.
+
+See the [generic example and lifecycle table](examples/README.md). The two reusable prompts let you specify `[PROJECT LIFECYCLE]` or select `AUTO-DETECT`.
+
 ## Setup
 
 1. Install GitHub CLI (latest release), authenticate: `gh auth login`. Check permissions with `gh auth status`; for Projects, if needed run `gh auth refresh -s project`.
