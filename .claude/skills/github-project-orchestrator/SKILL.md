@@ -7,11 +7,22 @@ description: Audit an existing GitHub repository then create or reconcile its re
 
 Operate on real GitHub objects, not just README and ROADMAP text. Accept `OWNER/REPO` or `https://github.com/OWNER/REPO`. Use the GitHub CLI (`gh`) and checked-in `scripts/github_project_sync.py` after reading the target repo. The skill is reusable across different repos; do not create a new management-framework repo for each target.
 
+## Choose the project's lifecycle before planning
+
+Infer the **current lifecycle from evidence**, not from the repository age or the existence of code alone: releases/packages, production users, open and closed work, release notes, maintenance obligations, roadmaps and current goals. Record evidence and uncertainty. Distinguish:
+- **New / exploratory:** problem discovery, feasibility, prototype and optionally an MVP if the owner wants one.
+- **Pre-release / active build:** the next validated release or agreed product increment; do not restart discovery.
+- **Established / already released:** current delivery state, defects and safety/security, compatibility, technical debt, adoption, CI/release health, contributor work and the **next real release or objective**. **Never invent another MVP.**
+- **Research:** reproducible experiments, datasets, benchmarks, papers and evidence gates rather than a product MVP.
+- **Maintenance-only / sunset:** bug fixes, security, support and deprecation or migration obligations.
+
+For an established repository, **reconcile existing milestones, epics, issue hierarchy and the current board first**. Preserve done work and historical releases; don't reconstruct them or generate "M0 baseline / M1 MVP" by default. New milestones are optional and must correspond to justified outcomes under the repository's milestone policy; evergreen tasks can have no milestone. If no changes are necessary, output a maintenance/report-only result. Where lifecycle is uncertain, report unknown and ask for a decision before committing a new product stage.
+
 ## Mandatory workflow
 
 1. Read target repo README, CONTRIBUTING, SECURITY, AGENTS.md, CLAUDE.md, roadmap docs, issues (open and closed), pull requests, milestones, Project boards, labels and current CI. On a private repo, authenticate with authorized account; never echo tokens. Stop if repo content is insufficient for planning.
 2. Check existing GitHub Project boards and roadmap documents before proposing duplicates. Treat GitHub Issues/PRs/Projects as the execution source of truth. Preserve manual edits, milestones, statuses and assignments.
-3. Produce a meaningful MVP/release sequence with acceptance criteria; construct `project-plan.json` using the repository's actual language, components and test structure. Use the example only for JSON syntax, not its fake tasks. Put epics before related work conceptually; the provisioner creates real parent/sub-issue relationships by key regardless of JSON ordering. Add blocked-by keys and verify the graph has no cycles.
+3. Select a lifecycle-appropriate sequence: only plan an MVP for a genuinely early-stage project when justified; for a released product, work from existing releases and milestones toward the next deliverable, reliability and maintenance needs; for research, use evidence/experiment gates. Construct `project-plan.json` using the repository's actual language, components and test structure. Use the example only for JSON syntax, not its fake tasks. Put epics before related work conceptually; the provisioner creates real parent/sub-issue relationships by key regardless of JSON ordering. Add blocked-by keys and verify the graph has no cycles.
 4. Validate and preview:
 
 ```bash
