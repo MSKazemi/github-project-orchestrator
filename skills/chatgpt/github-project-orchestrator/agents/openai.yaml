@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Project Orchestrator"
+  short_description: "Create real Projects, milestones, epics, sub-issues, priorities and dependencies"
+  default_prompt: "Set up or maintain professional GitHub project management for this repository. Audit existing work first, propose an idempotent native GitHub plan, and apply approved changes with verification."
