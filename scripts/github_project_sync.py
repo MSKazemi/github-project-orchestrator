@@ -86,11 +86,14 @@ def validate(raw):
             raise SetupError(f'issue {i["key"]}: parent key not found')
         if i.get('parent') == i['key']:
             raise SetupError(f'issue {i["key"]} cannot parent itself')
-        for b in i.get('blocked_by', []):
+        for b in i.get('blocked_by') or []:
             if b not in issue_keys or b == i['key']:
                 raise SetupError(f'issue {i["key"]}: invalid blocker {b}')
     def cycle_check(relation):
-        graph = {i['key']: ([i[relation]] if relation == 'parent' and i.get(relation) else i.get(relation, [])) for i in issues}
+        if relation == 'parent':
+            graph = {i['key']: [i['parent']] if i.get('parent') else [] for i in issues}
+        else:
+            graph = {i['key']: list(i.get(relation) or []) for i in issues}
         visiting, visited = set(), set()
         def visit(k):
             if k in visiting:
@@ -209,6 +212,11 @@ def linked_issue_numbers(detail, field):
     return {node['number'] for node in nodes}
 
 
+def label_norm(name):
+    """Compare label names ignoring case and whitespace: 'type: epic' == 'type:epic'."""
+    return re.sub(r'\s+', '', str(name)).lower()
+
+
 def notice(action, dry):
     print(('PLAN ' if dry else 'DONE ') + action)
 
@@ -236,6 +244,8 @@ def execute(plan, apply=False, with_views=False):
     except SetupError:
         labels = []
     label_set = {v['name'] for v in labels}
+    # Reuse an equivalent existing label instead of creating a near-duplicate.
+    label_names = {label_norm(n): n for n in label_set}
     if len(labels) >= 1000:
         raise SetupError('Label list hit 1000; cannot guarantee duplicate-safe sync')
     if new_project:
@@ -253,15 +263,23 @@ def execute(plan, apply=False, with_views=False):
         notice(f'reuse existing Project V2 #{project["number"]}: {title}', dry)
     for p in ('P0','P1','P2','P3'):
         label = 'priority:'+p
-        if label not in label_set:
+        if label_norm(label) in label_names:
+            if label_names[label_norm(label)] != label:
+                notice(f'reuse existing label {label_names[label_norm(label)]!r} for {label}', dry)
+        else:
             notice('create label '+label, dry)
+            label_names[label_norm(label)] = label
             if apply:
                 run('label','create',label,'--repo',repo,'--color',COLORS[p],
                     '--description','Managed priority '+p)
     for kind in ('epic', 'task'):
         label = 'type:'+kind
-        if label not in label_set:
+        if label_norm(label) in label_names:
+            if label_names[label_norm(label)] != label:
+                notice(f'reuse existing label {label_names[label_norm(label)]!r} for {label}', dry)
+        else:
             notice('create label '+label, dry)
+            label_names[label_norm(label)] = label
             if apply:
                 run('label','create',label,'--repo',repo,'--color','1D76DB',
                     '--description','Project work type '+kind)
@@ -279,8 +297,10 @@ def execute(plan, apply=False, with_views=False):
         fields = {f['name']:f for f in fields_state(number, owner)}
     else:
         fields = {}
-    field_defs=[('Priority','SINGLE_SELECT','P0,P1,P2,P3'),
-                ('Start date','DATE',None),('Target date','DATE',None)]
+    field_defs=[('Priority','SINGLE_SELECT','P0,P1,P2,P3')]
+    # Date fields only when the plan carries (approved) dates; empty fields imply a schedule.
+    if any(i.get('start_date') or i.get('target_date') for i in plan['issues']):
+        field_defs+=[('Start date','DATE',None),('Target date','DATE',None)]
     for name,kind,opts in field_defs:
         if name not in fields:
             notice('create Project field '+name+' ('+kind+')', dry)
@@ -312,8 +332,9 @@ def execute(plan, apply=False, with_views=False):
             notice('create '+i.get('kind','task')+' '+i['key']+': '+i['title'],dry)
             if apply:
                 args=['issue','create','--repo',repo,'--title',i['title'],
-                      '--body',desired_body(i), '--label','priority:'+i.get('priority','P2'),
-                      '--label','type:'+i.get('kind','task')]
+                      '--body',desired_body(i),
+                      '--label',label_names[label_norm('priority:'+i.get('priority','P2'))],
+                      '--label',label_names[label_norm('type:'+i.get('kind','task'))]]
                 mkey=i.get('milestone')
                 if mkey:
                     mtitle=next(x['title'] for x in plan['milestones'] if x['key']==mkey)
@@ -326,8 +347,12 @@ def execute(plan, apply=False, with_views=False):
                 provenance[i['key']]='created'
     # Relationships: do not mutate unrelated existing issues matched by title.
     for i in plan['issues']:
+        skip_matched = provenance.get(i['key']) == 'matched-title'
         if i.get('parent'):
-            notice(f'set parent {i["key"]} -> {i["parent"]}', dry)
+            if dry and skip_matched:
+                print(f'SKIP set parent {i["key"]} -> {i["parent"]} (matched-title issue preserved; link separately)')
+            else:
+                notice(f'set parent {i["key"]} -> {i["parent"]}', dry)
             if apply and provenance[i['key']] in ('created', 'managed'):
                 detail = run('issue','view',str(issues_by_key[i['key']]),'--repo',repo,
                              '--json','parent',json_result=True)
@@ -341,7 +366,10 @@ def execute(plan, apply=False, with_views=False):
                     print(f'REVIEW parent conflict for {i["key"]}: current #{current_parent}, desired #{desired_parent}; preserved', file=sys.stderr)
             elif apply and provenance[i['key']] == 'matched-title':
                 print('REVIEW parent for matched-title issue '+i['key']+' (preserved)', file=sys.stderr)
-        for b in i.get('blocked_by', []):
+        for b in i.get('blocked_by') or []:
+            if dry and skip_matched:
+                print(f'SKIP link dependency {i["key"]} blocked by {b} (matched-title issue preserved; link separately)')
+                continue
             notice(f'link dependency {i["key"]} blocked by {b}', dry)
             if apply and provenance[i['key']] == 'created':
                 run('issue','edit',str(issues_by_key[i['key']]),'--repo',repo,

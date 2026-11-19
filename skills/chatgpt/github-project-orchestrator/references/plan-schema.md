@@ -9,9 +9,9 @@ Reference file: `../assets/project-plan.example.json`.
 - `issues`: array of `{key, kind, title, body, priority, milestone, parent, blocked_by, start_date, target_date}`.
   - `kind`: `epic` or `task`; `priority` P0/P1/P2/P3.
   - `milestone`: milestone key defined above, or omitted/null.
-  - `parent`: issue key, or omitted/null. Native GitHub sub-issue edge is created for new issues, and missing parent edges on explicitly managed issues may be repaired; conflicting human-set parent edges are preserved for review.
+  - `parent`: issue key, or omitted/null. For an issue reused by exact title, the parent edge is **not** created (the dry run prints `SKIP set parent …`); add it separately with `gh issue edit PARENT --add-sub-issue N` after approval. Native GitHub sub-issue edge is created for new issues, and missing parent edges on explicitly managed issues may be repaired; conflicting human-set parent edges are preserved for review.
   - `blocked_by`: list of issue keys in the same plan; script creates native `blocked by` edges for new issues and fills missing edges on previously managed issues.
-  - `start_date` and `target_date`: ISO YYYY-MM-DD if meaningful; otherwise null. Project item fields are populated only for newly added items, to preserve human edits.
+  - `start_date` and `target_date`: ISO YYYY-MM-DD if meaningful; otherwise null. The `Start date` / `Target date` Project fields are created only when at least one issue carries a date. Project item fields are populated only for newly added items, to preserve human edits.
   - `body`: Markdown with outcome, acceptance criteria, tests and evidence. A stable management marker is appended automatically, enabling duplicate-safe reruns.
 
 ## Date and dependency rules

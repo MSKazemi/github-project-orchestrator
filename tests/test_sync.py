@@ -148,13 +148,48 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(fake.issues),3)
         self.assertEqual(len(fake.items),3)
         self.assertEqual(len(fake.milestones),2)
-        self.assertEqual(len(fake.fields),3)
+        # Example plan has no dates, so only Priority is created (date fields are opt-in).
+        self.assertEqual([f['name'] for f in fake.fields],['Priority'])
         self.assertEqual(len(fake.labels),6)
         self.assertIn(('parent',101,100),fake.links)
         self.assertIn(('parent',102,100),fake.links)
         self.assertIn(101, fake.blockers[102])
         second_actions=[x[0] for x in fake.actions[first_count:]]
         self.assertFalse(any(x.startswith(('issue create','project create','project item-add','project field-create','label create')) for x in second_actions), second_actions)
+
+    def test_explicit_null_parent_is_valid(self):
+        self.plan['issues'][0]['parent']=None
+        self.plan['issues'][0]['blocked_by']=None
+        gpo.validate(self.plan)
+
+    def test_reuses_equivalent_existing_label(self):
+        fake=FakeGh()
+        fake.labels=['type: epic','Priority: P1']
+        with patch.object(gpo,'run',fake),patch.object(gpo.shutil,'which',return_value='/usr/bin/gh'),redirect_stdout(io.StringIO()):
+            gpo.execute(self.plan,apply=True)
+        self.assertNotIn('type:epic',fake.labels)
+        self.assertNotIn('priority:P1',fake.labels)
+        epic_create=next(a for a,_ in fake.actions if a.startswith('issue create') and 'baseline-epic' in a)
+        self.assertIn('--label type: epic',epic_create)
+
+    def test_date_fields_created_only_when_plan_has_dates(self):
+        self.plan['issues'][1]['target_date']='2026-12-01'
+        fake=FakeGh()
+        with patch.object(gpo,'run',fake),patch.object(gpo.shutil,'which',return_value='/usr/bin/gh'),redirect_stdout(io.StringIO()):
+            gpo.execute(self.plan,apply=True)
+        self.assertEqual(sorted(f['name'] for f in fake.fields),['Priority','Start date','Target date'])
+
+    def test_dry_run_flags_skipped_links_on_matched_title_issues(self):
+        fake=FakeGh()
+        fake.issues=[{'number':5,'title':i['title'],'body':'','url':f'https://github.com/OWNER/REPOSITORY/issues/{5+n}'}
+                     for n,i in enumerate(self.plan['issues'])]
+        for n,x in enumerate(fake.issues): x['number']=5+n
+        out=io.StringIO()
+        with patch.object(gpo,'run',fake),patch.object(gpo.shutil,'which',return_value='/usr/bin/gh'),redirect_stdout(out):
+            gpo.execute(self.plan,apply=False)
+        text=out.getvalue()
+        self.assertIn('SKIP set parent test-audit -> baseline-epic (matched-title',text)
+        self.assertNotIn('PLAN set parent test-audit',text)
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Install a recent GitHub CLI version that supports `gh issue create --parent` and `gh issue edit --add-blocked-by`. Run `gh auth login`, `gh auth status`, and `gh auth refresh -s project` if your token allows it. Ensure issue write access to the repository and project permissions for the chosen owner. Never paste a token into conversation or commit it to a repository.
+Install a recent GitHub CLI version that supports `gh api --paginate --slurp`, `gh issue create --parent`, `gh issue edit --add-blocked-by` / `--add-sub-issue`, and `gh project item-edit --url --field --value` (verified with gh 2.105.0; distribution packages such as Ubuntu's 2.45.0 lack them and the read-only preview fails with `unknown flag: --slurp`). Run `gh auth login`, `gh auth status`, and `gh auth refresh -s project` if your token allows it. Ensure issue write access to the repository and project permissions for the chosen owner. Never paste a token into conversation or commit it to a repository.
 
 **Native API / CLI mapping**
 

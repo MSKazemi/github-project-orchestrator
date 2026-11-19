@@ -51,9 +51,9 @@ python3 scripts/github_project_sync.py --plan project-plan.json --apply --confir
 | Object | Supported action |
 |---|---|
 | Projects V2 | Create or reuse project; link new project to target repo |
-| Fields | Create Priority, Start date, Target date if absent |
+| Fields | Create Priority if absent; Start date / Target date only when the plan carries dates |
 | Milestones | Create missing repo-level milestones and approved due dates |
-| Labels | Create missing priority and epic/task labels |
+| Labels | Create missing `priority:P0-P3` and `type:epic`/`type:task` labels; reuse an equivalent existing label (case/whitespace-insensitive, e.g. `type: epic`) instead of creating a near-duplicate |
 | Epics/issues | Create with stable managed key; reuse existing exact-title matches |
 | Hierarchy | Link newly created tasks to parent epic as native sub-issues |
 | Dependencies | Native blocked-by relationships for new/managed issues |
