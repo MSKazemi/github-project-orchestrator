@@ -4,20 +4,20 @@
   "project": {
     "owner": "OWNER",
     "title": "REPOSITORY Delivery",
-    "description": "Roadmap, epics, technical work, blockers and release readiness. All dates are proposed until approved.",
+    "description": "Illustrative delivery management for an existing or new repository. Reuse existing Project and milestones; add only justified work. No dates are approved.",
     "visibility": "PRIVATE"
   },
   "milestones": [
     {
       "key": "m0",
-      "title": "M0 - Verified baseline",
-      "description": "Reproducible baseline tests, risk review and approved scope. No deadline set without owner agreement.",
+      "title": "M0 - Current priorities and evidence review (illustrative)",
+      "description": "Use an existing milestone if it fits. This is a fictional review objective; don't create it unless an audit finds a real milestone gap.",
       "due_on": null
     },
     {
       "key": "m1",
-      "title": "M1 - MVP candidate",
-      "description": "Implementation and evidence for a reviewable MVP candidate.",
+      "title": "M1 - Next meaningful delivery gate (illustrative)",
+      "description": "A verified next release, maintenance increment or research objective, not a compulsory MVP. Omit this milestone if the repository has no matching deliverable.",
       "due_on": null
     }
   ],
@@ -25,16 +25,16 @@
     {
       "key": "baseline-epic",
       "kind": "epic",
-      "title": "[EPIC] Establish verified engineering baseline",
-      "body": "## Outcome\nCreate reliable, reproducible engineering gates.\n\n## Acceptance criteria\n- [ ] Owner reviews baseline evidence\n- [ ] CI failures and unsupported assumptions documented\n- [ ] Release blockers visible in GitHub",
+      "title": "[EPIC] Reconcile current delivery and reliability evidence",
+      "body": "## Outcome\nConfirm what is already shipped, in progress, blocked and verified.\n\n## Acceptance criteria\n- [ ] Review existing releases and issue/project records\n- [ ] Confirm material reliability or delivery gaps with evidence\n- [ ] Avoid recreating completed work",
       "priority": "P1",
       "milestone": "m0"
     },
     {
       "key": "test-audit",
       "kind": "task",
-      "title": "Audit test and CI coverage against current architecture",
-      "body": "## Outcome\nCreate an evidence-backed inventory of test and CI gaps.\n\n## Acceptance criteria\n- [ ] Record observed commands and results\n- [ ] Separate mocks from real integration evidence\n- [ ] Link every critical gap to an issue",
+      "title": "Review current CI, tests and open regression gaps",
+      "body": "## Outcome\nEstablish whether any missing evidence or test coverage blocks the next meaningful outcome.\n\n## Acceptance criteria\n- [ ] Record actual tests and CI evidence\n- [ ] Separate simulated from real-platform validation\n- [ ] Reuse existing issues; open only genuinely missing work",
       "priority": "P1",
       "milestone": "m0",
       "parent": "baseline-epic",
@@ -45,12 +45,14 @@
     {
       "key": "release-gate",
       "kind": "task",
-      "title": "Document MVP release criteria and verification checklist",
-      "body": "## Outcome\nDefine an auditable MVP GO/NO-GO checklist.\n\n## Acceptance criteria\n- [ ] Pass/fail gates are testable\n- [ ] Human approval gate recorded\n- [ ] Rollback process is linked",
+      "title": "Review criteria for the next release or maintenance increment",
+      "body": "## Outcome\nDefine the next justified completion gate without inventing an MVP.\n\n## Acceptance criteria\n- [ ] Document actual target outcome and dependencies\n- [ ] Record testable acceptance evidence\n- [ ] Preserve existing release and milestone policy",
       "priority": "P2",
       "milestone": "m1",
       "parent": "baseline-epic",
-      "blocked_by": ["test-audit"],
+      "blocked_by": [
+        "test-audit"
+      ],
       "start_date": null,
       "target_date": null
     }
