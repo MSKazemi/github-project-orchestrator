@@ -4,6 +4,19 @@
 
 This is **not** itself a centralized GitHub Projects board. The target repo owns its own issue/PR/workflow state. This repository only versions the reusable method and provisioner. The skill source is stored in `skills/chatgpt/` and `.claude/skills/` for their respective clients.
 
+## Copy-and-paste prompts for ANY project
+
+No need to write a new prompt or Skill for each repository. Replace `[NAME OF THE PROJECT]` and `[GITHUB REPOSITORY URL]` in the linked templates:
+
+| Start here | Use with | What happens |
+|---|---|---|
+| [ChatGPT — project setup and management](prompts/CHATGPT.md) | ChatGPT + GitHub connector | Audit, plan, propose milestones/epics/dependencies and request approval for GitHub changes |
+| [Claude Code — provision GitHub](prompts/CLAUDE.md) | Claude Code + authenticated `gh` | Review code, build a valid JSON plan, dry-run, apply approved native GitHub objects and verify links |
+| [Weekly project review](prompts/WEEKLY_REVIEW.md) | ChatGPT (or Claude Code) | Read-only status, blockers, PRs, priorities, risks and next actions |
+| [Step-by-step generic example](examples/README.md) | Either | Shows placeholders, example hierarchy, commands and roles |
+
+**Example input:** Project `[NAME OF THE PROJECT]`; repository `[GITHUB REPOSITORY URL]`. Always start by inspecting the live repository, then plan, approve the exact writes, apply through authorized tools and verify the resulting GitHub objects.
+
 ## Setup
 
 1. Install GitHub CLI (latest release), authenticate: `gh auth login`. Check permissions with `gh auth status`; for Projects, if needed run `gh auth refresh -s project`.
