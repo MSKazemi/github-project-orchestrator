@@ -4,6 +4,10 @@
 
 This is **not** itself a centralized GitHub Projects board. The target repo owns its own issue/PR/workflow state. This repository only versions the reusable method and provisioner. The skill source is stored in `skills/chatgpt/` and `.claude/skills/` for their respective clients.
 
+## Branch policy
+
+This toolkit repository uses **`main` as its single long-lived branch**. Do not create feature branches by default. If the owner explicitly requests PR-based review, keep it temporary, review tests, merge after authorization, and delete the merged branch. This policy applies to **this toolkit repository**; do not override each target repository's own contribution and branch rules.
+
 ## Copy-and-paste prompts for ANY project
 
 No need to write a new prompt or Skill for each repository. Replace `[NAME OF THE PROJECT]` and `[GITHUB REPOSITORY URL]` in the linked templates:
