@@ -1,0 +1,27 @@
+name: Offline validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests (no GitHub mutations)
+        run: python3 -m unittest discover -s tests -v
+      - name: Example schema validation (offline)
+        run: python3 scripts/github_project_sync.py --plan examples/project-plan.example.json --check-only
+      - name: Check ChatGPT skill script matches canonical version
+        run: cmp scripts/github_project_sync.py skills/chatgpt/github-project-orchestrator/scripts/github_project_sync.py
+      - name: Package ChatGPT skill (offline)
+        run: python3 scripts/package_chatgpt_skill.py --output /tmp/skill.zip
